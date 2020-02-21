@@ -6,7 +6,7 @@ import crypto from 'crypto'
 import bcrypt from 'bcrypt-nodejs'
 
 const mongoUrl = process.env.MONGO_URL || 'mongodb://localhost/auth'
-mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(mongoUrl, {useNewUrlParser: true, useUnifiedTopology: true})
 mongoose.Promise = Promise
 
 const User = mongoose.model('User', {
@@ -23,6 +23,8 @@ const User = mongoose.model('User', {
     default: () => crypto.randomBytes(128).toString('hex')
   }
 })
+
+
 
 //   PORT=9000 npm start
 const port = process.env.PORT || 8080
@@ -41,12 +43,12 @@ const authenticateUser = async (req, res, next) => {
       req.user = user
       next()
     } else {
-      res.status(401).json({ loggedOut: true })
+      res.status(401).json({loggedOut: true, message: "Please try logging in again"})
     }
   } catch (err) {
     res
       .status(403)
-      .json({ message: 'access token missing or wrong', errors: err.errors })
+      .json({message: 'access token missing or wrong', errors: err.errors})
   }
 }
 
@@ -57,33 +59,37 @@ app.get('/', (req, res) => {
 // Create user  - sign up
 app.post('/users', async (req, res) => {
   try {
-    const { name, password } = req.body
-    const user = new User({ name, password: bcrypt.hashSync(password) })
+    const {name, password} = req.body
+    const user = new User({name, password: bcrypt.hashSync(password)})
     const saved = await user.save()
     res.status(201).json(saved)
   } catch (err) {
-    res.status(400).json({ message: 'could not save user', errors: err.errors })
+    res.status(400).json({message: 'could not save user', errors: err.errors})
   }
 })
 
 // Secure endpoint, user needs to be logged in to access this.
 app.get('/users/:id', authenticateUser)
 app.get('/users/:id', (req, res) => {
-  res.send('YEAH')
+  try {
+    res.status(201).json(req.user)
+  } catch (err) {
+    res.status(400).json({message: 'could not save user', errors: err.errors})
+  }
 })
 
 // login user
 app.post('/sessions', async (req, res) => {
   try {
-    const { name, password } = req.body
-    const user = await User.findOne({ name })
+    const {name, password} = req.body
+    const user = await User.findOne({name})
     if (user && bcrypt.compareSync(password, user.password)) {
-      res.status(201).json({ useId: user._id, accessToken: user.accessToken })
+      res.status(201).json({useId: user._id, accessToken: user.accessToken})
     } else {
-      res.json({ notFound: true })
+      res.json({notFound: true})
     }
   } catch (err) {
-    res.status(400).json({ message: 'could not find user', errors: err.errors })
+    res.status(400).json({message: 'could not find user', errors: err.errors})
   }
 })
 
