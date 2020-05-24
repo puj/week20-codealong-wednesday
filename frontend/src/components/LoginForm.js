@@ -11,29 +11,9 @@ export const LoginForm = () => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLoginSuccess = (loginResponse) => {
-    // For debugging
-    const statusMessage = JSON.stringify(loginResponse);
-    dispatch(
-      user.actions.setStatusMessage({
-        statusMessage,
-      })
-    );
+  const handleLoginSuccess = (loginResponse) => {};
 
-    // Save information
-    dispatch(
-      user.actions.setAccessToken({ accessToken: loginResponse.accessToken })
-    );
-    dispatch(user.actions.setUserId({ userId: loginResponse.userId }));
-  };
-
-  const handleLoginFailed = (loginError) => {
-    const statusMessage = JSON.stringify(loginError);
-    dispatch(user.actions.setStatusMessage({ statusMessage }));
-
-    // Clear login values
-    dispatch(user.actions.logout());
-  };
+  const handleLoginFailed = (loginError) => {};
 
   // To sign up a user.
   const handleSignup = (event) => {

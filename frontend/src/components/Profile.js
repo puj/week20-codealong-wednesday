@@ -9,19 +9,11 @@ export const Profile = () => {
   const userId = useSelector((store) => store.user.login.userId);
   const statusMessage = useSelector((store) => store.user.login.statusMessage);
 
-  const loginSuccess = (loginResponse) => {
-    const statusMessage = `Login Response: ${JSON.stringify(loginResponse)}`;
-    dispatch(user.actions.setStatusMessage({ statusMessage }));
-  };
+  const loginSuccess = (loginResponse) => {};
 
-  const loginFailed = (loginError) => {
-    const statusMessage = `Login Failed: ${loginError}`;
-    dispatch(user.actions.setStatusMessage({ statusMessage }));
-  };
+  const loginFailed = (loginError) => {};
 
-  const logout = () => {
-    dispatch(user.actions.logout());
-  };
+  const logout = () => {};
 
   const login = () => {
     // Include userId in the path
