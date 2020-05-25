@@ -1,28 +1,44 @@
-import React, { useState } from "react";
-import Profile from "./Profile";
-import { useDispatch, useSelector } from "react-redux";
-import { user } from "../reducers/user";
-const SIGNUP_URL = "http://localhost:8080/users";
-const LOGIN_URL = "http://localhost:8080/sessions";
+import React, { useState } from 'react';
+import Profile from './Profile';
+import { useDispatch, useSelector } from 'react-redux';
+import { user } from '../reducers/user';
+const SIGNUP_URL = 'http://localhost:8080/users';
+const LOGIN_URL = 'http://localhost:8080/sessions';
 
 export const LoginForm = () => {
   const dispatch = useDispatch();
   const accessToken = useSelector((store) => store.user.login.accessToken);
-  const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
+  const [name, setName] = useState('');
+  const [password, setPassword] = useState('');
 
-  const handleLoginSuccess = (loginResponse) => {};
+  const handleLoginSuccess = (loginResponse) => {
+    // For debugging only
+    const statusMessage = JSON.stringify(loginResponse);
+    dispatch(user.actions.setStatusMessage({ statusMessage }));
 
-  const handleLoginFailed = (loginError) => {};
+    // Save the login info
+    dispatch(
+      user.actions.setAccessToken({ accessToken: loginResponse.accessToken })
+    );
+    dispatch(user.actions.setUserId({ userId: loginResponse.userId }));
+  };
+
+  const handleLoginFailed = (loginError) => {
+    const statusMessage = JSON.stringify(loginError);
+    dispatch(user.actions.setStatusMessage({ statusMessage }));
+
+    // Clear login values
+    dispatch(user.actions.logout());
+  };
 
   // To sign up a user.
   const handleSignup = (event) => {
     event.preventDefault();
 
     fetch(SIGNUP_URL, {
-      method: "POST",
+      method: 'POST',
       body: JSON.stringify({ name, password }),
-      headers: { "Content-Type": "application/json" },
+      headers: { 'Content-Type': 'application/json' },
     })
       .then((res) => res.json())
       .then((json) => handleLoginSuccess(json))
@@ -34,9 +50,9 @@ export const LoginForm = () => {
     event.preventDefault();
 
     fetch(LOGIN_URL, {
-      method: "POST",
+      method: 'POST',
       body: JSON.stringify({ name, password }),
-      headers: { "Content-Type": "application/json" },
+      headers: { 'Content-Type': 'application/json' },
     })
       .then((res) => res.json())
       .then((json) => handleLoginSuccess(json))

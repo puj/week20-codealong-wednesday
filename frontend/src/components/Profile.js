@@ -1,24 +1,36 @@
-import React, { useState, useEffect } from "react";
-import { user } from "../reducers/user";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useState, useEffect } from 'react';
+import { user } from '../reducers/user';
+import { useDispatch, useSelector } from 'react-redux';
 
-const URL = "http://localhost:8080/users";
+const URL = 'http://localhost:8080/users';
 export const Profile = () => {
   const dispatch = useDispatch();
   const accessToken = useSelector((store) => store.user.login.accessToken);
   const userId = useSelector((store) => store.user.login.userId);
   const statusMessage = useSelector((store) => store.user.login.statusMessage);
 
-  const loginSuccess = (loginResponse) => {};
+  const loginSuccess = (loginResponse) => {
+    const statusMessage = `Authenticated Endpoint: ${JSON.stringify(
+      loginResponse
+    )}`;
+    dispatch(user.actions.setStatusMessage({ statusMessage }));
+  };
 
-  const loginFailed = (loginError) => {};
+  const loginFailed = (loginError) => {
+    const statusMessage = `Authenticated Endpoint Failed: ${JSON.stringify(
+      loginError
+    )}`;
+    dispatch(user.actions.setStatusMessage({ statusMessage }));
+  };
 
-  const logout = () => {};
+  const logout = () => {
+    dispatch(user.actions.logout());
+  };
 
   const login = () => {
     // Include userId in the path
     fetch(`${URL}/${userId}`, {
-      method: "GET",
+      method: 'GET',
       // Include the accessToken to get the protected endpoint
       headers: { Authorization: accessToken },
     })
