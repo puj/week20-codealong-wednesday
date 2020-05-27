@@ -79,9 +79,12 @@ app.post('/users', async (req, res) => {
 });
 
 // Secure endpoint, user needs to be logged in to access this.
-app.get('/users/:id', authenticateUser);
-app.get('/users/:id', (req, res) => {
-  res.status(201).json({ name: req.user.name, userId: req.user._id });
+app.get('/users/:id/secret', authenticateUser);
+app.get('/users/:id/secret', (req, res) => {
+  const secretMessage = `This is a super secret message for  ${req.user.name}`;
+  // Compile information that is access protected
+  // And send it back to the client to use for that specific user
+  res.status(201).json({ secretMessage });
 });
 
 // login user

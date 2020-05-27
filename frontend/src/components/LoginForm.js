@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Profile from './Profile';
 import { useDispatch, useSelector } from 'react-redux';
-import { user } from '../reducers/user';
+import { user, login } from '../reducers/user';
 const SIGNUP_URL = 'http://localhost:8080/users';
 const LOGIN_URL = 'http://localhost:8080/sessions';
 
@@ -10,26 +10,6 @@ export const LoginForm = () => {
   const accessToken = useSelector((store) => store.user.login.accessToken);
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
-
-  const handleLoginSuccess = (loginResponse) => {
-    // For debugging only
-    const statusMessage = JSON.stringify(loginResponse);
-    dispatch(user.actions.setStatusMessage({ statusMessage }));
-
-    // Save the login info
-    dispatch(
-      user.actions.setAccessToken({ accessToken: loginResponse.accessToken })
-    );
-    dispatch(user.actions.setUserId({ userId: loginResponse.userId }));
-  };
-
-  const handleLoginFailed = (loginError) => {
-    const statusMessage = JSON.stringify(loginError);
-    dispatch(user.actions.setStatusMessage({ statusMessage }));
-
-    // Clear login values
-    dispatch(user.actions.logout());
-  };
 
   // To sign up a user.
   const handleSignup = (event) => {
@@ -40,23 +20,30 @@ export const LoginForm = () => {
       body: JSON.stringify({ name, password }),
       headers: { 'Content-Type': 'application/json' },
     })
-      .then((res) => res.json())
-      .then((json) => handleLoginSuccess(json))
-      .catch((err) => handleLoginFailed(err));
+      .then((res) => {
+        if (!res.ok) {
+          throw 'Could not create account.  Try a different username.';
+        }
+        return res.json();
+      })
+      .then((json) => {
+        // Save the login info
+        dispatch(
+          user.actions.setAccessToken({
+            accessToken: json.accessToken,
+          })
+        );
+        dispatch(user.actions.setUserId({ userId: json.userId }));
+      })
+      .catch((err) => {
+        dispatch(user.actions.setErrorMessage({ errorMessage: err }));
+      });
   };
 
-  // To sign up a user.
+  // To sign in a user.
   const handleLogin = (event) => {
     event.preventDefault();
-
-    fetch(LOGIN_URL, {
-      method: 'POST',
-      body: JSON.stringify({ name, password }),
-      headers: { 'Content-Type': 'application/json' },
-    })
-      .then((res) => res.json())
-      .then((json) => handleLoginSuccess(json))
-      .catch((err) => handleLoginFailed(err));
+    dispatch(login(name, password));
   };
 
   if (!accessToken) {
